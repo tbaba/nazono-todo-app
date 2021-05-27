@@ -1,26 +1,50 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { atom, MutableSnapshot, RecoilRoot, useRecoilValue } from "recoil";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+let id = 0;
+function getId() {
+  return id++;
 }
 
-export default App;
+type Todo = {
+  id: number;
+  content: string;
+  isCompleted: boolean;
+};
+
+const todosState = atom<Todo[]>({
+  key: "state/todos",
+  default: [],
+});
+
+const Todos = () => {
+  const todos = useRecoilValue(todosState);
+
+  const contents = todos.map((todo) => (
+    <div key={`todo-${todo.id}`}>{todo.content}</div>
+  ));
+  return <>{contents}</>;
+};
+
+const initialize = ({ set }: MutableSnapshot) => {
+  set(todosState, [
+    {
+      id: getId(),
+      content: "ご飯を買ってくる",
+      isCompleted: false,
+    },
+    {
+      id: getId(),
+      content: "手を洗う",
+      isCompleted: false,
+    },
+  ]);
+};
+
+export default function () {
+  return (
+    <RecoilRoot initializeState={initialize}>
+      <Todos />
+    </RecoilRoot>
+  );
+}
